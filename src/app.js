@@ -10,7 +10,7 @@ import { originGuard } from './middleware/originGuard.js';
 import { currencyRateLimiter } from './middleware/rateLimiter.js';
 
 const app = express();
-
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({ origin: config.clientOrigin }));
 app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
