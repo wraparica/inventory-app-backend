@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cookieParser from "cookie-parser";
 
 import { config } from './config/index.js';
 import inventoryRoutes from './routes/inventoryAuth.js'
@@ -14,6 +15,7 @@ app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({ origin: config.clientOrigin }));
 app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
+app.use(cookieParser());
 app.use(express.json());
 
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));

@@ -1,7 +1,20 @@
 import bcrypt from "bcryptjs";
 import User from "../model/user.js";
 import { AppError } from '../utils/AppError.js';
-import { postRegister, postLogin } from "../services/inventoryService.js";
+import {
+    postRegister, postLogin, createAccessToken,
+    createRefreshToken,
+    rotateRefreshToken,
+    revokeRefreshToken,
+} from "../services/inventoryService.js";
+
+const refreshCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/api",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+};
 
 export async function register(req, res, next) {
     try {
@@ -58,17 +71,17 @@ export async function login(req, res, next) {
         const { username, password } = req.body;
 
         if (!username || !username.trim()) {
-            throw new AppError('Username is required', 400);
+            throw new AppError("Username is required", 400);
         }
 
         if (!password || !password.trim()) {
-            throw new AppError('Password is required', 400);
+            throw new AppError("Password is required", 400);
         }
 
         const user = await User.findOne({ username });
 
         if (!user) {
-            throw new AppError('Invalid username', 400);
+            throw new AppError("Invalid username or password", 401);
         }
 
         const passwordValid = await bcrypt.compare(
@@ -77,15 +90,30 @@ export async function login(req, res, next) {
         );
 
         if (!passwordValid) {
-            throw new AppError('Invalid password', 400);
+            throw new AppError("Invalid username or password", 401);
         }
 
-        const data = await postLogin(user)
+        // Generate tokens after validating credentials
+        const accessToken = createAccessToken(user);
+        const refreshToken = await createRefreshToken(user);
 
-        res.json({
+        // Store the refresh token in an HttpOnly cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite:
+                process.env.NODE_ENV === "production" ? "none" : "lax",
+            path: "/api",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(200).json({
             success: true,
             message: "Login successful",
-            data: data,
+            data: {
+                accessToken,
+                username: user.username,
+            },
         });
     } catch (err) {
         next(err);
@@ -119,5 +147,71 @@ export async function getCurrentUser(req, res, next) {
 
     } catch (err) {
         next(err);
+    }
+}
+
+export async function refresh(req, res, next) {
+    try {
+        const oldToken = req.cookies?.refreshToken;
+
+        if (!oldToken) {
+            return res.status(401).json({
+                success: false,
+                message: "Refresh token required",
+            });
+        }
+
+        const userId = await rotateRefreshToken(oldToken);
+
+        if (!userId) {
+            res.clearCookie("refreshToken", refreshCookieOptions);
+
+            return res.status(401).json({
+                success: false,
+                message: "Invalid or expired refresh token",
+            });
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            res.clearCookie("refreshToken", refreshCookieOptions);
+
+            return res.status(401).json({
+                success: false,
+                message: "User no longer exists",
+            });
+        }
+
+        const accessToken = createAccessToken(user);
+        const newRefreshToken = await createRefreshToken(user);
+
+        res.cookie("refreshToken", newRefreshToken, refreshCookieOptions);
+
+        return res.status(200).json({
+            success: true,
+            data: { accessToken },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function logout(req, res, next) {
+    try {
+        const token = req.cookies?.refreshToken;
+
+        if (token) {
+            await revokeRefreshToken(token);
+        }
+
+        res.clearCookie("refreshToken", refreshCookieOptions);
+
+        return res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+        });
+    } catch (error) {
+        next(error);
     }
 }
