@@ -8,6 +8,6 @@ router.post('/register', register)
 
 router.post('/login', login)
 
-router.post('/me', authenticate, getCurrentUser)
+router.get('/me', authenticate, getCurrentUser)
 
 export default router;
