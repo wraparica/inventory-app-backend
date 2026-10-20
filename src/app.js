@@ -11,9 +11,24 @@ import { originGuard } from './middleware/originGuard.js';
 import { currencyRateLimiter } from './middleware/rateLimiter.js';
 
 const app = express();
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://wraparica.github.io",
+];
 app.set('trust proxy', 1);
 app.use(helmet());
-app.use(cors({ origin: config.clientOrigin }));
+
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error("Origin not allowed by CORS"));
+    },
+    credentials: true,
+}));
 app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
 app.use(cookieParser());
 app.use(express.json());
