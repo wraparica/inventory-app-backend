@@ -91,3 +91,33 @@ export async function login(req, res, next) {
         next(err);
     }
 }
+
+export async function getCurrentUser(req, res, next) {
+    try {
+        const userId = req.user.id;
+
+        const user = await User.findById(userId).select("-password");
+
+        if (!user) {
+            throw new AppError('Invalid username', 400);
+        }
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                id: user._id,
+                username: user.username,
+            },
+        });
+
+    } catch (err) {
+        next(err);
+    }
+}
