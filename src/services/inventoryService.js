@@ -1,5 +1,6 @@
 import { AppError } from '../utils/AppError.js';
 import User from "../model/user.js";
+import RefreshToken from "../models/refreshToken.js";
 import jwt from 'jsonwebtoken';
 import crypto from "node:crypto";
 
