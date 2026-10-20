@@ -1,6 +1,7 @@
 import { AppError } from '../utils/AppError.js';
 import User from "../model/user.js";
 import jwt from 'jsonwebtoken';
+import crypto from "node:crypto";
 
 const ACCESS_TOKEN_EXPIRES_IN =
     process.env.ACCESS_TOKEN_EXPIRES_IN || "15m";
