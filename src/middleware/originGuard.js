@@ -1,6 +1,9 @@
 import { config } from '../config/index.js';
 import { AppError } from '../utils/AppError.js';
-
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://wraparica.github.io",
+];
 /**
  * Rejects requests whose Origin/Referer doesn't match the allowed frontend.
  *
@@ -16,19 +19,17 @@ import { AppError } from '../utils/AppError.js';
  * session or account system to issue credentials to.
  */
 export function originGuard(req, res, next) {
-  const origin = req.get('origin') || req.get('referer');
+    const origin = req.get("origin");
 
-  if (!origin) {
-    return next();
-    //return next(new AppError('Forbidden', 403));
-  }
+    // Allow requests without an Origin header, if appropriate
+    // for your API and deployment.
+    if (!origin) {
+        return next();
+    }
 
-  const allowed = config.clientOrigin;
-  const isAllowed = allowed === '*' || origin.startsWith(allowed);
+    if (!allowedOrigins.includes(origin)) {
+        return next(new AppError("Forbidden", 403));
+    }
 
-  if (!isAllowed) {
-    return next(new AppError('Forbidden', 403));
-  }
-
-  next();
+    next();
 }
