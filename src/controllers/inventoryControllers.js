@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import User from "../model/user.js";
 import { AppError } from '../utils/AppError.js';
 import {
-    postRegister, postLogin, createAccessToken,
+    postRegister, createAccessToken,
     createRefreshToken,
     rotateRefreshToken,
     revokeRefreshToken,

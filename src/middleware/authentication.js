@@ -22,8 +22,11 @@ export const authenticate = (req, res, next) => {
       token,
       process.env.JWT_SECRET
     );
-
-    req.user = decoded;
+    console.log("Decoded JWT:", decoded);
+    req.user = {
+      userId: decoded.id,
+      username: decoded.username,
+    };
 
     next();
   } catch (error) {

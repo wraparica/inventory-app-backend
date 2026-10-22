@@ -31,38 +31,12 @@ export async function postRegister(email, username, password) {
     return data;
 }
 
-export async function postLogin(user) {
-    let data;
-    try {
-        const token = jwt.sign(
-            {
-                id: user._id,
-                email: user.email,
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-            }
-        );
-        data = {
-            token: token,
-            user: {
-                id: user._id,
-                email: user.email,
-                username: user.username,
-            }
-        }
-    } catch (err) {
-        console.log(err)
-        throw new AppError('Received an invalid response from provider', 502);
-    }
-
-    return data;
-}
-
 export function createAccessToken(user) {
   return jwt.sign(
-    { id: user._id.toString() },
+    { 
+        id: user._id.toString(),
+        username: user.username,
+     },
     process.env.JWT_SECRET,
     { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
   );
