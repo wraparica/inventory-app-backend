@@ -8,10 +8,7 @@ import {
 
 export async function uom(req, res, next) {
     try {
-        console.log('UOM HIT');
-        console.log('Content-Type:', req.headers['content-type']);
-        console.log('Body:', req.body);
-
+        
         if (!req.body || Object.keys(req.body).length === 0) {
             throw new AppError('Request body is required', 400);
         }
