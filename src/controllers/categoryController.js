@@ -57,12 +57,11 @@ export const editCategory = async (req, res, next) => {
         const { id } = req.params;
         const createdBy = req.user.userId;
         const createdByUsername = req.user.username;
-        const { name, isActive, description } = req.body;
+        const { name, description } = req.body;
 
         const data = await putCategory(
             id,
             name,
-            isActive,
             description,
             createdBy,
             createdByUsername

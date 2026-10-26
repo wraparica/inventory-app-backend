@@ -1,13 +1,13 @@
 import { AppError } from '../utils/AppError.js';
 import Category from "../model/category.js";
 
-export async function postCategory(name, symbol, description, createdBy, createdByUsername) {
+export async function postCategory(name, description, createdBy, createdByUsername) {
     let data;
     try {
         const uom = await Category.create({
             name,
-            isActive,
             description,
+            isActive: true,
             createdBy,
             createdByUsername,
         });
@@ -31,7 +31,7 @@ export async function getAllCategories(createdBy, createdByUsername) {
     }
 }
 
-export async function putCategory(id, name, isActive, description, createdBy, createdByUsername) {
+export async function putCategory(id, name, description, createdBy, createdByUsername) {
     try {
         const uom = await Category.findOneAndUpdate(
             {
@@ -42,7 +42,6 @@ export async function putCategory(id, name, isActive, description, createdBy, cr
             {
                 $set: {
                     name,
-                    isActive,
                     description,
                 },
             },
