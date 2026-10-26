@@ -43,6 +43,7 @@ export async function putCategory(id, name, description, createdBy, createdByUse
                 $set: {
                     name,
                     description,
+                    isActive: true,
                 },
             },
             {
