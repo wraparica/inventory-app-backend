@@ -151,6 +151,8 @@ export async function getCurrentUser(req, res, next) {
 }
 
 export async function refresh(req, res, next) {
+    console.log("Refresh cookie received:", Boolean(oldToken));
+    console.log("Parsed cookie names:", Object.keys(req.cookies ?? {}));
     try {
         const oldToken = req.cookies?.refreshToken;
 
