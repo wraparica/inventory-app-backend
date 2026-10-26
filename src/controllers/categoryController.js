@@ -14,7 +14,7 @@ export async function category(req, res, next) {
         }
         const createdBy = req.user.userId;
         const createdByUsername = req.user.username;
-        const { name, isActive, description } = req.body;
+        const { name, description } = req.body;
 
         if (!name || !name.trim()) {
             throw new AppError('Unit name is required', 400);
@@ -24,7 +24,7 @@ export async function category(req, res, next) {
             throw new AppError('Description is required', 400);
         }
 
-        const data = await postCategory(name, isActive, description, createdBy, createdByUsername)
+        const data = await postCategory(name, description, createdBy, createdByUsername)
 
         res.status(201).json({
             success: true,
